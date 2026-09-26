@@ -1,0 +1,38 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging and build output
+*.pyc
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Local tooling and OS files
+.coverage
+coverage.xml
+.coverage.*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
