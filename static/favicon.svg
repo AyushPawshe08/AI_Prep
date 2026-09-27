@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="AI Learning Pipeline">
+  <rect width="48" height="48" rx="10" fill="#08090C"/>
+  <g fill="none" stroke="#F5C542" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 14 24 6l16 8-16 8Z"/>
+    <path d="m8 23 16 8 16-8"/>
+    <path d="m8 32 16 8 16-8"/>
+  </g>
+</svg>
