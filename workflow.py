@@ -19,22 +19,30 @@ class PipelineState(TypedDict):
     answers: str
     revision_notes: str
 
-# Initialize Groq LLM
-llm = ChatGroq(
-    model_name="openai/gpt-oss-120b",
-    temperature=0.3
-)
+def get_llm() -> ChatGroq:
+    """Create the model client only when a generation request needs it."""
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "GROQ_API_KEY is not configured. Add it to the .env file before generating a module."
+        )
+    return ChatGroq(
+        model="openai/gpt-oss-120b",
+        temperature=0.3,
+        api_key=api_key,
+    )
 
 # Nodes
 def generate_objectives(state: PipelineState) -> Dict[str, Any]:
     prompt = f"Generate clear, concise learning objectives for the topic: {state['topic']}"
-    res = llm.invoke([HumanMessage(content=prompt)])
+    res = get_llm().invoke([HumanMessage(content=prompt)])
     return {"learning_objectives": res.content}
 
 def generate_explanations(state: PipelineState) -> Dict[str, Any]:
     topic = state['topic']
     objectives = state['learning_objectives']
     
+    llm = get_llm()
     exp_res = llm.invoke([HumanMessage(content=f"Topic: {topic}\nObjectives: {objectives}\n\nProvide a high-level explanation of the topic.")])
     analogy_res = llm.invoke([HumanMessage(content=f"Topic: {topic}\n\nProvide a clear real-world analogy to help understand this topic.")])
     tech_res = llm.invoke([HumanMessage(content=f"Topic: {topic}\n\nProvide a detailed technical explanation of how this works under the hood.")])
@@ -49,17 +57,17 @@ def generate_explanations(state: PipelineState) -> Dict[str, Any]:
 
 def generate_quiz(state: PipelineState) -> Dict[str, Any]:
     prompt = f"Topic: {state['topic']}\n\nBased on these learning objectives:\n{state['learning_objectives']}\n\nCreate a 3-5 question quiz to test comprehension."
-    res = llm.invoke([HumanMessage(content=prompt)])
+    res = get_llm().invoke([HumanMessage(content=prompt)])
     return {"quiz": res.content}
 
 def generate_answers(state: PipelineState) -> Dict[str, Any]:
     prompt = f"Provide detailed answers and explanations for the following quiz questions:\n\n{state['quiz']}"
-    res = llm.invoke([HumanMessage(content=prompt)])
+    res = get_llm().invoke([HumanMessage(content=prompt)])
     return {"answers": res.content}
 
 def generate_revision_notes(state: PipelineState) -> Dict[str, Any]:
     prompt = f"Topic: {state['topic']}\n\nSummarize the key takeaways, bullet points, and quick revision notes for this topic."
-    res = llm.invoke([HumanMessage(content=prompt)])
+    res = get_llm().invoke([HumanMessage(content=prompt)])
     return {"revision_notes": res.content}
 
 # Create graph

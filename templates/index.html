@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Learning Pipeline — Interactive Learning Modules</title>
+  <meta name="description" content="Generate comprehensive, interactive AI-powered learning modules on any topic.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+
+  <!-- Sanitization and LaTeX Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Ambient Glow Effects -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 L21 7 L12 12 L3 7 Z"></path>
+            <path d="M3 12 L12 17 L21 12"></path>
+            <path d="M3 17 L12 22 L21 17"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">AI Learning Pipeline</span>
+          <span class="brand-badge">FastAPI + LangGraph</span>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-label">Ready</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    
+    <!-- Hero & Input Section -->
+    <section class="hero-section" id="heroSection">
+      <div class="hero-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2Z"></path>
+        </svg>
+        Multi-Step AI Knowledge Engine
+      </div>
+      
+      <h1 class="hero-title">Master Any Technical Concept</h1>
+      <p class="hero-subtitle">
+        Turn complex topics into structured learning modules with objectives, analogies, deep-dives, code examples, interactive quizzes, and revision notes.
+      </p>
+
+      <!-- Topic Input Box -->
+      <form class="search-form" id="searchForm" onsubmit="return false;">
+        <div class="input-wrapper">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="topicInput" 
+            placeholder="Enter any topic (e.g. Transformers, Backpropagation, RAG)..." 
+            autocomplete="off" 
+            spellcheck="false"
+            required
+          />
+          <button type="submit" id="generateBtn" class="generate-btn">
+            <span class="btn-text">Generate Module</span>
+            <span class="btn-loader spinner" style="display: none;"></span>
+            <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M13 5l7 7-7 7"></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- Topic Presets / Suggestions -->
+      <div class="presets-row">
+        <span class="presets-label">Popular topics:</span>
+        <button type="button" class="preset-pill" data-topic="Transformers Architecture">Transformers</button>
+        <button type="button" class="preset-pill" data-topic="Attention Mechanism">Attention Mechanism</button>
+        <button type="button" class="preset-pill" data-topic="Backpropagation">Backpropagation</button>
+        <button type="button" class="preset-pill" data-topic="Diffusion Models">Diffusion Models</button>
+        <button type="button" class="preset-pill" data-topic="Retrieval-Augmented Generation (RAG)">RAG Pipelines</button>
+        <button type="button" class="preset-pill" data-topic="Gradient Descent Optimization">Gradient Descent</button>
+      </div>
+    </section>
+
+    <!-- Workflow Progress Bar (Visible while loading) -->
+    <section class="progress-section" id="progressSection" style="display: none;">
+      <div class="progress-card">
+        <div class="progress-header">
+          <div class="progress-info">
+            <span class="progress-badge">Pipeline In Flight</span>
+            <h3 class="progress-topic-title" id="progressTopicTitle">Generating module...</h3>
+          </div>
+          <div class="progress-counter" id="progressPercentage">0%</div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+        </div>
+
+        <!-- Stepper Nodes -->
+        <div class="stepper-nodes" id="stepperNodes">
+          <div class="step-item" data-step="0">
+            <div class="step-circle"><span class="step-num">1</span></div>
+            <span class="step-label">Objectives</span>
+          </div>
+          <div class="step-item" data-step="1">
+            <div class="step-circle"><span class="step-num">2</span></div>
+            <span class="step-label">Explanation</span>
+          </div>
+          <div class="step-item" data-step="2">
+            <div class="step-circle"><span class="step-num">3</span></div>
+            <span class="step-label">Analogy</span>
+          </div>
+          <div class="step-item" data-step="3">
+            <div class="step-circle"><span class="step-num">4</span></div>
+            <span class="step-label">Technical</span>
+          </div>
+          <div class="step-item" data-step="4">
+            <div class="step-circle"><span class="step-num">5</span></div>
+            <span class="step-label">Code</span>
+          </div>
+          <div class="step-item" data-step="5">
+            <div class="step-circle"><span class="step-num">6</span></div>
+            <span class="step-label">Quiz</span>
+          </div>
+          <div class="step-item" data-step="6">
+            <div class="step-circle"><span class="step-num">7</span></div>
+            <span class="step-label">Revision</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error Banner -->
+    <div class="error-banner" id="errorBanner" style="display: none;">
+      <div class="error-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span id="errorMessage">An error occurred while generating the material.</span>
+      </div>
+      <button type="button" class="error-dismiss" id="errorDismiss">&times;</button>
+    </div>
+
+    <!-- Results Presentation Container -->
+    <section class="results-container" id="resultsContainer" style="display: none;">
+      
+      <!-- Module Header Bar -->
+      <div class="module-header-card">
+        <div class="module-title-wrap">
+          <span class="module-badge">Topic Module</span>
+          <h2 class="module-title" id="moduleTopic">Topic Title</h2>
+        </div>
+        
+        <div class="module-actions">
+          <button type="button" class="action-btn secondary-btn" id="printBtn" title="Print or save as browser PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            Print
+          </button>
+          
+          <button type="button" class="action-btn primary-action-btn" id="downloadPdfBtn" title="Download ReportLab generated PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span id="pdfBtnText">Download PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Section Jump Navigation Bar -->
+      <nav class="section-nav" id="sectionNav">
+        <a href="#sec-objectives" class="nav-pill active">01 Objectives</a>
+        <a href="#sec-explanation" class="nav-pill">02 Explanation</a>
+        <a href="#sec-analogy" class="nav-pill">03 Analogy</a>
+        <a href="#sec-technical" class="nav-pill">04 Technical</a>
+        <a href="#sec-code" class="nav-pill">05 Code</a>
+        <a href="#sec-quiz" class="nav-pill">06 Quiz</a>
+        <a href="#sec-revision" class="nav-pill">07 Revision</a>
+      </nav>
+
+      <!-- Section 01: Objectives -->
+      <div class="section-card" id="sec-objectives">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">01</span>
+            <div class="card-icon target-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <circle cx="12" cy="12" r="5"></circle>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"></circle>
+              </svg>
+            </div>
+            <h3 class="card-title">Learning Objectives</h3>
+          </div>
+        </div>
+        <div class="card-body" id="objectivesContent">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Section 02: Simple Explanation -->
+      <div class="section-card" id="sec-explanation">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">02</span>
+            <div class="card-icon book-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </div>
+            <h3 class="card-title">Simple Explanation</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="prose-content" id="explanationContent"></div>
+          <div class="terms-badges-wrap" id="explanationTerms" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Section 03: Analogy -->
+      <div class="section-card quote-card" id="sec-analogy">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">03</span>
+            <div class="card-icon quote-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9.5 6C6.5 6 4 8.6 4 12v6h6.2v-6H7.3C7.3 9.9 8.6 8.4 10.7 8.1L9.5 6Z"></path>
+                <path d="M19 6c-3 0-5.5 2.6-5.5 6v6h6.2v-6h-2.9c0-2.1 1.3-3.6 3.4-3.9L19 6Z"></path>
+              </svg>
+            </div>
+            <h3 class="card-title">Real-World Analogy</h3>
+          </div>
+        </div>
+        <div class="card-body analogy-body">
+          <div class="analogy-decoration">“</div>
+          <div class="prose-content" id="analogyContent"></div>
+        </div>
+      </div>
+
+      <!-- Section 04: Technical Explanation -->
+      <div class="section-card" id="sec-technical">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">04</span>
+            <div class="card-icon cpu-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="6" y="6" width="12" height="12" rx="1.5"></rect>
+                <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"></path>
+              </svg>
+            </div>
+            <h3 class="card-title">Technical Deep-Dive</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="prose-content" id="technicalContent"></div>
+        </div>
+      </div>
+
+      <!-- Section 05: Code Example -->
+      <div class="section-card" id="sec-code">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">05</span>
+            <div class="card-icon code-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                <path d="m7 9 3 3-3 3M13 15h4"></path>
+              </svg>
+            </div>
+            <h3 class="card-title">Code Implementation</h3>
+          </div>
+          <div class="header-right">
+            <button type="button" class="copy-code-btn" id="copyCodeBtn" title="Copy code snippet">
+              <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span class="copy-text">Copy Code</span>
+            </button>
+          </div>
+        </div>
+        <div class="card-body code-card-body">
+          <div class="code-editor-frame">
+            <div class="editor-top-bar">
+              <div class="window-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <span class="editor-file-title" id="codeFilename">example.py</span>
+              <span class="editor-lang-badge">Python</span>
+            </div>
+            <pre><code class="language-python" id="codeBlock"></code></pre>
+          </div>
+          <div class="code-notes" id="codeNotes" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Section 06: Quiz -->
+      <div class="section-card" id="sec-quiz">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">06</span>
+            <div class="card-icon help-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M9.5 9a2.5 2.5 0 0 1 4.6 1.3c0 1.7-2.1 2-2.1 3.3"></path>
+                <path d="M12 17h.01"></path>
+              </svg>
+            </div>
+            <h3 class="card-title">Interactive Quiz</h3>
+          </div>
+          <div class="header-right" id="quizScoreHeader" style="display: none;">
+            <div class="quiz-score-pill" id="quizScorePill">Score: 0 / 0</div>
+          </div>
+        </div>
+        <div class="card-body" id="quizQuestionsContainer">
+          <!-- Dynamically populated MCQ blocks -->
+        </div>
+      </div>
+
+      <!-- Section 07: Revision Notes -->
+      <div class="section-card" id="sec-revision">
+        <div class="card-header">
+          <div class="header-left">
+            <span class="card-kicker">07</span>
+            <div class="card-icon revision-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <h3 class="card-title">Quick Revision</h3>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="revision-cards-grid" id="revisionGrid"></div>
+          
+          <details class="accordion-drawer" id="fullNotesDrawer">
+            <summary class="accordion-summary">
+              <span>View Full Revision Notes & Summary</span>
+              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </summary>
+            <div class="accordion-content prose-content" id="fullRevisionContent"></div>
+          </details>
+        </div>
+      </div>
+
+      <!-- Bottom Call To Action -->
+      <div class="bottom-cta-card">
+        <h3>Ready to master another topic?</h3>
+        <p>Type in any machine learning, software engineering, or mathematical concept to generate its dedicated module.</p>
+        <button type="button" class="generate-another-btn" id="generateAnotherBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+          </svg>
+          Generate Another Module
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <p>© 2026 AI Learning Pipeline • Replaced Streamlit with HTML/CSS/JS frontend</p>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Custom Script -->
+  <script src="/static/script.js"></script>
+</body>
+</html>
